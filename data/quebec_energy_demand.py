@@ -27,19 +27,27 @@ class HQ_data():
         weather_data["datetime_index"] = datetime_index
         weather_data.set_index("datetime_index", inplace=True)
 
-        # get type of day (weekday or weekend)
-        print(weather_data.loc[self.start:self.end, "temp"])
-        print(demand_data.loc[self.start:self.end, "Moyenne (MW)"])
+        # get type of day 
+        day = list(map(lambda t: t.weekday(), demand_data.loc[self.start:self.end, :].index))
+        weekend = [5, 6]
+        is_weekend = list(map(lambda x: int(x in weekend), day))
+        summer = [6, 6, 7, 8, 9]
+        is_summer = list(map(lambda x: int(x in summer), demand_data.loc[self.start:self.end, :].index.month))
+
+        
+
         data = pd.DataFrame({
             "demand": list(demand_data.loc[self.start:self.end, "Moyenne (MW)"]),
-            #"temp": list(weather_data.loc[self.start:self.end, "temp"])
-            "date_time": list(demand_data.index[0:-1])
+            "temp": list(weather_data.loc[self.start:self.end, "temp"]),
+            "date_time": list(demand_data.index[0:-1]),
+            "day": day,
+            "is_weekend": is_weekend,
+            "is_summer": is_summer
         })
         data.set_index("date_time", inplace=True)
         data.fillna(method="backfill", inplace=True)
         return data
     
-    def get_history(self, start, end):
-
+    def get_history(self, start = datetime.datetime(2019, 1, 1, 1, 0, 0), end = datetime.datetime(2022, 12, 31, 23, 0, 0)):
         return self.data.loc[start:end, :]
     
