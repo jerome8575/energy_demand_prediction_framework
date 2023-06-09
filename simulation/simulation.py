@@ -2,6 +2,7 @@
 # librairies
 import sys
 sys.path.insert(0, "C:\\Users\\jerom\\coding\\energy_demand_prediction_framework\\")
+sys.path.insert(0, "C:\\Users\\jerom\\energy_demand_prediction_framework")
 
 import pandas as pd
 import numpy as np
@@ -65,6 +66,8 @@ class Simulation:
 
         results["forecast"] = forecasts
 
+        results.to_csv("results\\simulation_results.csv")
+
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 
         MSE = rmse(forecasts, demand)
@@ -82,7 +85,6 @@ class Simulation:
 
         print("Percentage within 500 mwh")
         print(sum(list(map(lambda x: int(x <= 500), abs(residuals))))/len(residuals))
-
 
         plt.plot(results.loc[:, "demand"], label="Demand")
         plt.plot(results.loc[:, "forecast"], label="Forecast")

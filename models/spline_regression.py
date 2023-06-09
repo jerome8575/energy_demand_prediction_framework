@@ -21,7 +21,7 @@ class SplineRegression:
         new_train_start = train_start + datetime.timedelta(days=1)
         
         data = data.loc[new_train_start:test_end, :]
-        data["lagged_demand"] = lagged_demand
+        data["lagged_demand"] = np.log(lagged_demand)
 
         forecasts = []
         for h in range(24):
@@ -34,7 +34,7 @@ class SplineRegression:
     
             # train test split
             features = pd.concat([basis_x, fourier], ignore_index=True, axis=1)
-            target = np.array(hourly_data.loc[:, "demand"])
+            target = np.log(np.array(hourly_data.loc[:, "demand"]))
 
             train_features = pf.fit_transform(features[:-1])
             train_target = target[:-1]
@@ -50,7 +50,7 @@ class SplineRegression:
             forecast = model.predict(test_features).tolist()
             forecasts.append(forecast)
 
-        return np.array(forecasts).flatten()
+        return np.exp(np.array(forecasts).flatten())
 
 
 
