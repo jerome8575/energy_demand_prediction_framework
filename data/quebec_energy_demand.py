@@ -39,8 +39,12 @@ class HQ_data():
         data = pd.DataFrame({
             "demand": list(demand_data.loc[self.start:self.end, "Moyenne (MW)"]),
             "temp": list(weather_data.loc[self.start:self.end, "temp"]),
+            "is_cloudy": list(weather_data.loc[self.start:self.end, "is_cloudy"]),
+            "is_clear": list(weather_data.loc[self.start:self.end, "is_clear"]),
+            "is_snowing": list(weather_data.loc[self.start:self.end, "is_snowing"]),
             "date_time": list(demand_data.index[0:-1]),
             "day": day,
+            "hour": list(map(lambda t: t.hour, demand_data.loc[self.start:self.end, :].index)),
             "is_weekend": is_weekend,
             "is_summer": is_summer
         })

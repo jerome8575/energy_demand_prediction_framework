@@ -3,19 +3,35 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-start = datetime.datetime(2022, 6, 15, 0, 0, 0)
-end = datetime.datetime(2022, 8, 30, 23, 0, 0)
+def calc_mape(df):
+    return np.mean(np.abs((np.array(df.loc[:, "demand"]) - np.array(df.loc[:, "forecast"]))) / np.array(df.loc[:, "demand"])) * 100
 
-data = pd.read_csv("results\simulation_results.csv")
+
+start = datetime.datetime(2022, 1, 1, 0, 0, 0)
+end = datetime.datetime(2022, 12, 26, 23, 0, 0)
+
+data = pd.read_csv("results\combined_forecast.csv")
 data["date_time"] = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'), data.loc[:, "date_time"]))
 data.set_index("date_time", inplace=True)
 
-demand = np.array(data.loc[start:end, "demand"])
-forecasts = np.array(data.loc[start:end, "forecast"])
+data = data.loc[start:end, :].copy()
 
-mape = np.mean(np.abs((demand - forecasts) / demand)) * 100
+demand = np.array(data.loc[:, "demand"])
+forecasts = np.array(data.loc[:, "forecast"])
+
+
+mape = calc_mape(data)
 print("MAPE")
 print(mape)
+
+mapes = []
+for i in range(1, 12):
+    start = datetime.datetime(2022, i, 1, 0, 0, 0)
+    end = datetime.datetime(2022, i+1, 1, 0, 0, 0) - datetime.timedelta(hours=1)
+    mapes.append(calc_mape(data.loc[start:end, :]))
+
+plt.plot(mapes)
+plt.show()
 
 residuals = demand - forecasts
 
@@ -25,9 +41,12 @@ print(sum(list(map(lambda x: int(x <= 1000), abs(residuals))))/len(residuals))
 print("Percentage within 500 mwh")
 print(sum(list(map(lambda x: int(x <= 500), abs(residuals))))/len(residuals))
 
-plt.plot(data.loc[start:end, ["demand", "forecast"]])
+plt.plot(data.loc[:, ["demand", "forecast"]])
 plt.show()
 
 plt.hist(residuals, bins=100)
+plt.show()
+
+plt.plot(residuals)
 plt.show()
 

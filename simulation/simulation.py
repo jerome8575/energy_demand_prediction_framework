@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 import datetime
 from data.quebec_energy_demand import HQ_data
 from models.spline_regression import SplineRegression
+from models.quadratic_regression import QuadraticRegression
+from models.short_term_regression import STRregression
+from models.SARIMAX_model import SARIMAX_model
 from statsmodels.tools.eval_measures import rmse
 
 class Simulation:
@@ -27,8 +30,10 @@ class Simulation:
     def get_prediction(self, train_start, train_end, test_start, test_end):
 
         """ implement algorithm or call algorithm here. Return array of 24 values for next day forecast """
-        sr = SplineRegression()
-        return sr.get_predictions(self.data, train_start, train_end, test_start, test_end)
+        reg = SARIMAX_model()
+        forecasts = reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
+
+        return forecasts
 
     def run_simulation(self):
         
