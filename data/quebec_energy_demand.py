@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import datetime 
+from sklearn.preprocessing import StandardScaler
 
 class HQ_data():
 
@@ -20,6 +21,9 @@ class HQ_data():
         self.data = self.get_features(demand_data, weather_data)
 
     def get_features(self, demand_data, weather_data):
+        scaler = StandardScaler()
+
+
         demand_data.set_index("Date", inplace=True)
         datetime_index = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M'), weather_data.loc[:, "datetime"]))
 
@@ -48,6 +52,14 @@ class HQ_data():
             "is_weekend": is_weekend,
             "is_summer": is_summer
         })
+        data["scaled_temp"] = scaler.fit_transform(np.array(data.loc[:, "temp"]).reshape(-1, 1))
+        data["log_demand"] = np.log(data.loc[:, "demand"])
+        data["demand_lag_24"] = data.loc[:, "demand"].shift(24)
+        data["demand_lag_48"] = data.loc[:, "demand"].shift(48)
+
+        for i in range(1, 24):
+            data["temp_lag_" + str(i)] = data.loc[:, "temp"].shift(i)
+        
         data.set_index("date_time", inplace=True)
         data.fillna(method="backfill", inplace=True)
         return data

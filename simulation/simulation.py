@@ -30,7 +30,7 @@ class Simulation:
     def get_prediction(self, train_start, train_end, test_start, test_end):
 
         """ implement algorithm or call algorithm here. Return array of 24 values for next day forecast """
-        reg = SARIMAX_model()
+        reg = QuadraticRegression()
         forecasts = reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
 
         return forecasts
@@ -67,11 +67,11 @@ class Simulation:
         sim_start = self.train_end + datetime.timedelta(hours=1)
         sim_end = sim_start + datetime.timedelta(days = self.num_iters) - datetime.timedelta(hours=1)
 
-        results = self.data.loc[sim_start:sim_end, ["demand"]]
+        results = self.data.loc[sim_start:sim_end, ["demand", "scaled_temp"]]
 
         results["forecast"] = forecasts
 
-        results.to_csv("results\\simulation_results.csv")
+        results.to_csv("results\\simulation_results_sarimax.csv")
 
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 

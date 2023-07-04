@@ -7,8 +7,8 @@ def calc_mape(df):
     return np.mean(np.abs((np.array(df.loc[:, "demand"]) - np.array(df.loc[:, "forecast"]))) / np.array(df.loc[:, "demand"])) * 100
 
 
-start = datetime.datetime(2022, 1, 1, 0, 0, 0)
-end = datetime.datetime(2022, 12, 26, 23, 0, 0)
+start = datetime.datetime(2021, 1, 1, 0, 0, 0)
+end = datetime.datetime(2021, 12, 31, 23, 0, 0)
 
 data = pd.read_csv("results\combined_forecast.csv")
 data["date_time"] = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'), data.loc[:, "date_time"]))
@@ -18,6 +18,10 @@ data = data.loc[start:end, :].copy()
 
 demand = np.array(data.loc[:, "demand"])
 forecasts = np.array(data.loc[:, "forecast"])
+"""
+plt.scatter(data.loc[:, "scaled_temp"], data.loc[:, "demand"])
+plt.scatter(data.loc[:, "scaled_temp"], data.loc[:, "forecast"])
+plt.show()"""
 
 
 mape = calc_mape(data)
@@ -26,8 +30,8 @@ print(mape)
 
 mapes = []
 for i in range(1, 12):
-    start = datetime.datetime(2022, i, 1, 0, 0, 0)
-    end = datetime.datetime(2022, i+1, 1, 0, 0, 0) - datetime.timedelta(hours=1)
+    start = datetime.datetime(2021, i, 1, 0, 0, 0)
+    end = datetime.datetime(2021, i+1, 1, 0, 0, 0) - datetime.timedelta(hours=1)
     mapes.append(calc_mape(data.loc[start:end, :]))
 
 plt.plot(mapes)

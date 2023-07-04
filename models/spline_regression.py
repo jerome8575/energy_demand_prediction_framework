@@ -21,14 +21,9 @@ class SplineRegression:
 
         data = data.loc[train_start:test_end, :].copy()
 
-        temp = scaler.fit_transform(np.array(data.loc[:, "temp"]).reshape(-1, 1)).flatten()
-        demand = np.log(data.loc[:, "demand"])
-
-        data["log_demand"] = demand
-        data["scaled_temp"] = temp
+        temp = np.array(data.loc[:, "scaled_temp"])
 
         forecasts = []
-        start_plus_one_day = train_start + datetime.timedelta(days=2)
         for h in range(24):
             """hourly_data = augmented_data[h::24]
 
@@ -41,24 +36,17 @@ class SplineRegression:
 
             hourly_data = data[h::24]
 
-            temp_diff = np.diff(hourly_data.loc[:, "scaled_temp"])
-            demand_lag = np.array(hourly_data.loc[:, "log_demand"])[:-1]
-            demand_lag_lag = np.array(hourly_data.loc[:, "log_demand"])[:-2]
+            temp = np.array(hourly_data.loc[:, "scaled_temp"])
+            basis_x = dmatrix("bs(scaled_temp, knots=(0, 1), degree=3, include_intercept=False)", {"scaled_temp": temp}, return_type='dataframe')
 
-            temp = np.array(hourly_data.loc[start_plus_one_day:, "scaled_temp"])
-            basis_x = dmatrix("bs(scaled_temp, knots=(0.4, 0.6), degree=3, include_intercept=False)", {"scaled_temp": temp}, return_type='dataframe')
+            basis_x["demand_lag"] = np.array(hourly_data.loc[:, "demand_lag_24"])
+            basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
+            basis_x["temp_1"] = np.array(hourly_data.loc[:, "temp_lag_1"]) 
+            basis_x["temp_11"] = np.array(hourly_data.loc[:, "temp_lag_11"])
+            basis_x["temp_index"] = np.array(hourly_data.loc[:, "temp_lag_1"])  * np.array(hourly_data.loc[:, "temp_lag_11"])
+            basis_x["is_weekend"] = np.array(hourly_data.loc[:, "is_weekend"])
 
-            hourly_data = hourly_data.loc[start_plus_one_day:, :].copy()
-
-            basis_x["temp_diff"] = temp_diff[1:]
-            basis_x["temp_squared"] = temp ** 2
-            basis_x["lags"] = demand_lag[1:]
-            basis_x["lags_lag"] = demand_lag_lag
-            basis_x["is_clear"] = list(hourly_data.loc[:, "is_clear"])
-
-            fourier = pd.DataFrame(np.array(self.get_fourier_features(6, 7, hourly_data.loc[:, "day"])))
-
-            exog = pd.concat([basis_x, fourier], ignore_index=True, axis=1)
+            exog = basis_x
             target = np.array(hourly_data.loc[:, "log_demand"])
 
             train_features = exog[:-1]
