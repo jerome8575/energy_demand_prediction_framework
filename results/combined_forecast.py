@@ -11,10 +11,10 @@ from statsmodels.tools.eval_measures import rmse
 import statsmodels.api as sm
 from sklearn.preprocessing import PolynomialFeatures, MinMaxScaler
 
-pf = PolynomialFeatures(degree=2, interaction_only=True)
+pf = PolynomialFeatures(degree=1)
 
-spline_regression = pd.read_csv("results\simulation_results.csv")
-quadratic_regression = pd.read_csv("results\simulation_results_sarimax.csv")
+spline_regression = pd.read_csv("results\simulation_results_spline.csv")
+quadratic_regression = pd.read_csv("results\simulation_results_spline_202.csv")
 sarimax = pd.read_csv("results\sarimax_results.csv")
 
 data = pd.concat([spline_regression.loc[:, ["date_time", "demand", "scaled_temp", "forecast"]], quadratic_regression.loc[:, "forecast"], sarimax.loc[:, "forecast"]], ignore_index=True, axis=1)
@@ -31,7 +31,7 @@ data = data.loc[start:end, :].copy()
 
 target = np.array(data.loc[:, "demand"])
 
-exog = pf.fit_transform(data.loc[:, ["spline", "quadratic", "scaled_temp"]])
+exog = pf.fit_transform(data.loc[:, ["spline", "quadratic"]])
 
 model = sm.OLS(target, exog).fit()
 print(model.summary())

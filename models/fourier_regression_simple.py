@@ -12,7 +12,7 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 
-class QuadraticRegression:
+class FourierRegressionSimple:
 
     def get_predictions(self, data, train_start, train_end, test_start, test_end):
 
@@ -28,13 +28,9 @@ class QuadraticRegression:
 
         features = fourier_features
         features["scaled_temp"] = data.loc[:, "scaled_temp"].values
-        features["is_clear"] = data.loc[:, "is_clear"].values
         features["temp_lag_15"] = data.loc[:, "temp_lag_15"].values
         features["temp_index_15"] = data.loc[:, "temp_index_15"].values
         features["demand_lag_24"] = data.loc[:, "demand_lag_24"].values
-        features["rel_hum"] = data.loc[:, "rel_hum"].values
-        features["scaled_temp_diff_24"] = data.loc[:, "scaled_temp_diff_24"].values
-        features["scaled_temp_diff_48"] = data.loc[:, "scaled_temp_diff_48"].values
 
         features["date_time"] = data.index
 

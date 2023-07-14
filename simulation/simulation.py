@@ -11,6 +11,7 @@ import datetime
 from data.quebec_energy_demand import HQ_data
 from models.spline_regression import SplineRegression
 from models.quadratic_regression import QuadraticRegression
+from models.Combined_model import Combined_model
 from models.short_term_regression import STRregression
 from models.SARIMAX_model import SARIMAX_model
 from statsmodels.tools.eval_measures import rmse
@@ -30,10 +31,16 @@ class Simulation:
     def get_prediction(self, train_start, train_end, test_start, test_end):
 
         """ implement algorithm or call algorithm here. Return array of 24 values for next day forecast """
-        reg = QuadraticRegression()
-        forecasts = reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
+        model = Combined_model()
+        forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)
 
-        return forecasts
+        """spline_reg = SplineRegression()
+        forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+
+        """quad_reg = QuadraticRegression()
+        forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+
+        return forecasts, params
 
     def run_simulation(self):
         
@@ -44,10 +51,11 @@ class Simulation:
 
         forecasts = []
 
+        ensemble_params = pd.DataFrame(columns=["Intercept", "spline", "quadratic"])
         for i in range(self.num_iters):
 
-            forecast = self.get_prediction(train_start, train_end, test_start, test_end)
-            
+            forecast, params = self.get_prediction(train_start, train_end, test_start, test_end)
+            ensemble_params.loc[len(ensemble_params)] = params
             forecasts.append(forecast)
 
             print("********************************************")
@@ -60,7 +68,7 @@ class Simulation:
             test_start = test_start + datetime.timedelta(days=1)
             test_end = test_end + datetime.timedelta(days=1)
 
-        return np.array(forecasts).flatten()
+        return np.array(forecasts).flatten(), ensemble_params
 
     def plot_sim_results(self, forecasts):
 
@@ -71,7 +79,7 @@ class Simulation:
 
         results["forecast"] = forecasts
 
-        results.to_csv("results\\simulation_results_sarimax.csv")
+        results.to_csv("results\\simulation_results_ensemble.csv")
 
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 

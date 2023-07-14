@@ -16,7 +16,7 @@ class HQ_data():
         data_2022 = pd.read_excel("data_files\\2022-demande-electricite-quebec.xlsx")
 
         demand_data = pd.concat([data_2019, data_2020, data_2021, data_2022])
-        weather_data = pd.read_csv("data_files\quebec_weather_index.csv")
+        weather_data = pd.read_csv("data_files\montreal_weather_index.csv")
 
         self.data = self.get_features(demand_data, weather_data)
 
@@ -50,7 +50,10 @@ class HQ_data():
             "day": day,
             "hour": list(map(lambda t: t.hour, demand_data.loc[self.start:self.end, :].index)),
             "is_weekend": is_weekend,
-            "is_summer": is_summer
+            "is_summer": is_summer,
+            "wind_speed": list(weather_data.loc[self.start:self.end, "wind_speed"]),
+            "wind_chill": list(weather_data.loc[self.start:self.end, "wind_chill"]),
+            "rel_hum": list(weather_data.loc[self.start:self.end, "rel_hum"])
         })
         data["scaled_temp"] = scaler.fit_transform(np.array(data.loc[:, "temp"]).reshape(-1, 1))
         data["log_demand"] = np.log(data.loc[:, "demand"])
@@ -59,6 +62,16 @@ class HQ_data():
 
         for i in range(1, 24):
             data["temp_lag_" + str(i)] = data.loc[:, "temp"].shift(i)
+        for i in range(1,24):
+            data["temp_index_"+ str(i)] = data["temp_lag_" + str(i)] * data.loc[:, "scaled_temp"]
+
+        l = list(data.loc[:, "scaled_temp"])
+        diff = [l[i] - l[i-24] for i in range(24, len(l))]
+        data["scaled_temp_diff_24"] = [0] * 24 + diff
+
+        l = list(data.loc[:, "scaled_temp"])
+        diff = [l[i] - l[i-48] for i in range(48, len(l))]
+        data["scaled_temp_diff_48"] = [0] * 48 + diff
         
         data.set_index("date_time", inplace=True)
         data.fillna(method="backfill", inplace=True)

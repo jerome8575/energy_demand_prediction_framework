@@ -23,51 +23,61 @@ class SplineRegression:
 
         temp = np.array(data.loc[:, "scaled_temp"])
 
-        forecasts = []
+        forecasts = {}
+        base_forecasts = []
+        max_corr_lags_winter = [7, 7, 7, 8, 9, 8, 9, 10, 11, 11, 12, 13, 14, 15, 1, 1, 1, 2, 2, 3, 4, 6, 6, 7]
         for h in range(24):
-            """hourly_data = augmented_data[h::24]
-
-            temp = scaler.fit_transform(np.array(hourly_data.loc[:, "temp"]).reshape(-1, 1)).flatten()
-            basis_x = dmatrix("bs(temp, knots=(0.4, 0.6), degree=3, include_intercept=False)", {"temp": temp}, return_type='dataframe')
-            basis_x["lags"] = np.array(hourly_data.loc[:, "lag"])
-            basis_x["is_cloudy"] = np.array(hourly_data.loc[:, "is_cloudy"])
-            basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
-            basis_x["is_snowing"] = np.array(hourly_data.loc[:, "is_snowing"])"""
 
             hourly_data = data[h::24]
 
             temp = np.array(hourly_data.loc[:, "scaled_temp"])
-            basis_x = dmatrix("bs(scaled_temp, knots=(0, 1), degree=3, include_intercept=False)", {"scaled_temp": temp}, return_type='dataframe')
+            basis_x = dmatrix("bs(scaled_temp, knots=(0, 0.5, 1, 1.3), degree=3, include_intercept=True)", {"scaled_temp": temp}, return_type='dataframe')
 
             basis_x["demand_lag"] = np.array(hourly_data.loc[:, "demand_lag_24"])
             basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
             basis_x["temp_1"] = np.array(hourly_data.loc[:, "temp_lag_1"]) 
-            basis_x["temp_11"] = np.array(hourly_data.loc[:, "temp_lag_11"])
-            basis_x["temp_index"] = np.array(hourly_data.loc[:, "temp_lag_1"])  * np.array(hourly_data.loc[:, "temp_lag_11"])
+            basis_x["temp_15"] = np.array(hourly_data.loc[:, "temp_lag_15"])
             basis_x["is_weekend"] = np.array(hourly_data.loc[:, "is_weekend"])
+            #basis_x["wind_speed"] = np.array(hourly_data.loc[:, "wind_speed"])
+            basis_x["rel_hum"] = np.array(hourly_data.loc[:, "rel_hum"])
+            basis_x["rel_hum_temp"] = np.array(hourly_data.loc[:, "rel_hum"]) * np.array(hourly_data.loc[:, "scaled_temp"]) 
+            basis_x["temp_high_corr"] = np.array(hourly_data.loc[:, "temp_lag_"+str(max_corr_lags_winter[h])])
+            basis_x["temp_high_corr_inde"] = np.array(hourly_data.loc[:, "temp_index_"+str(max_corr_lags_winter[h])])
+
+            basis_x["date_time"] = hourly_data.index
+            basis_x.set_index("date_time", inplace=True)
+
 
             exog = basis_x
-            target = np.array(hourly_data.loc[:, "log_demand"])
+            target = hourly_data.loc[:, "log_demand"]
 
-            train_features = exog[:-1]
-            train_target = target[:-1]
+            train_features = exog.loc[train_start:train_end, :]
+            train_target = target.loc[train_start:train_end]
 
             model = sm.OLS(train_target, train_features).fit()
 
             # get predictions
-            """training_forecasts = model.predict(train_features)
-            residuals = training_forecasts - train_target
+            training_forecasts = model.predict(train_features)
+            residuals = np.array(training_forecasts - train_target)
 
-            res_model = ARIMA(residuals[-50:], order=(1, 0, 1), exog=temp[-51:-1]).fit()
+
+            residual_predictors = ["scaled_temp", "is_weekend"]
+
+            #res_model = ARIMA(residuals[-50:], order=(1, 0, 1), exog=np.array(hourly_data.loc[:, residual_predictors][-51:-1])).fit()
             #training_res_hat = res_model.predict(0, len(residuals[-50:]) - 1, exog=temp[-51:-1])
- 
-            res_hat = res_model.forecast(1, exog=temp[-1])"""
 
-            test_features = exog.loc[len(basis_x)-1, :]
+            #res_hat = res_model.forecast(1, exog=np.array(hourly_data.loc[:, residual_predictors])[-1])
 
-            forecast = model.predict(test_features).tolist() #- res_hat
-            forecasts.append(forecast)
+            test_features = exog.loc[test_start:test_end, :]
+            base_forecast = model.predict(test_features).tolist()
 
+            forecast = base_forecast
+            #print(len(forecast)) #- res_hat
+            forecasts["h_" + str(h)] = forecast
+
+        # retrieve continuous forecasts
+
+        forecasts = pd.DataFrame(forecasts)
 
         return np.exp(np.array(forecasts).flatten())
 
