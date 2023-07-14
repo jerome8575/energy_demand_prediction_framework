@@ -31,16 +31,16 @@ class Simulation:
     def get_prediction(self, train_start, train_end, test_start, test_end):
 
         """ implement algorithm or call algorithm here. Return array of 24 values for next day forecast """
-        model = Combined_model()
-        forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)
+        """model = Combined_model()
+        forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
         """spline_reg = SplineRegression()
         forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
-        """quad_reg = QuadraticRegression()
-        forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+        quad_reg = QuadraticRegression()
+        forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
 
-        return forecasts, params
+        return forecasts#, params
 
     def run_simulation(self):
         
@@ -54,8 +54,8 @@ class Simulation:
         ensemble_params = pd.DataFrame(columns=["Intercept", "spline", "quadratic"])
         for i in range(self.num_iters):
 
-            forecast, params = self.get_prediction(train_start, train_end, test_start, test_end)
-            ensemble_params.loc[len(ensemble_params)] = params
+            forecast = self.get_prediction(train_start, train_end, test_start, test_end)
+            #ensemble_params.loc[len(ensemble_params)] = params
             forecasts.append(forecast)
 
             print("********************************************")
@@ -79,7 +79,7 @@ class Simulation:
 
         results["forecast"] = forecasts
 
-        results.to_csv("results\\simulation_results_ensemble.csv")
+        results.to_csv("results\\simulation_results_quadratic_regression.csv")
 
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 
