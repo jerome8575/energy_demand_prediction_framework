@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 from data.quebec_energy_demand import HQ_data
+from data.spain_demand_data import RE_data
 from models.spline_regression import SplineRegression
 from models.quadratic_regression import QuadraticRegression
 from models.Combined_model import Combined_model
@@ -26,17 +27,17 @@ class Simulation:
         self.train_end = train_end
         self.test_start = test_start
         self.test_end = test_end
-        self.data = HQ_data()
+        self.data = RE_data()
         self.data = self.data.get_history()
 
     def get_prediction(self, train_start, train_end, test_start, test_end):
 
         """ implement algorithm or call algorithm here. Return array of 24 values for next day forecast """
-        model = Combined_model()
-        forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)
+        """model = Combined_model()
+        forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
-        """spline_reg = SplineRegression()
-        forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+        spline_reg = SplineRegression()
+        forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
 
         """quad_reg = QuadraticRegression()
         forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
@@ -44,7 +45,10 @@ class Simulation:
         """inf_norm_reg = InfiniteNormMinimization()
         forecasts = inf_norm_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
-        return forecasts, params
+        """sarimxa = SARIMAX_model()
+        forecasts = sarimxa.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+
+        return forecasts
 
     def run_simulation(self):
         
@@ -58,8 +62,8 @@ class Simulation:
         ensemble_params = pd.DataFrame(columns=["Intercept", "spline", "quadratic"])
         for i in range(self.num_iters):
 
-            forecast, params = self.get_prediction(train_start, train_end, test_start, test_end)
-            ensemble_params.loc[len(ensemble_params)] = params
+            forecast = self.get_prediction(train_start, train_end, test_start, test_end)
+            #ensemble_params.loc[len(ensemble_params)] = params
             forecasts.append(forecast)
 
             print("********************************************")
@@ -83,7 +87,7 @@ class Simulation:
 
         results["forecast"] = forecasts
 
-        results.to_csv("results\\simulation_results_ensemble.csv")
+        results.to_csv("results\\spline_spain_corrected_2021.csv")
 
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 

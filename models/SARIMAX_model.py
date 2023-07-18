@@ -25,8 +25,13 @@ class SARIMAX_model:
 
             hourly_data = data[h::24]
 
-            temp = hourly_data.loc[:, ["temp"]]
-            temp["temp_squared"] = temp.loc[:, "temp"] ** 2
+            temp = hourly_data.loc[:, ["scaled_temp"]]
+            temp["is_clear"] = hourly_data.loc[:, "is_clear"].values
+            #temp["rel_hum"] = hourly_data.loc[:, "rel_hum"].values
+            #temp["wind_speed"] = hourly_data.loc[:, "wind_speed"].values
+            temp["temp_15"] = hourly_data.loc[:, "temp_lag_15"].values
+            temp["temp_index_15"] = hourly_data.loc[:, "temp_index_15"].values
+
             ff_week = self.get_fourier_features(6, 7, hourly_data.loc[:, "day"])
 
             X = pd.concat([temp, ff_week], ignore_index=True, axis=1)
@@ -39,7 +44,7 @@ class SARIMAX_model:
             print("x_train: ", x_train.shape)
             x_test = X.loc[test_start:test_end, :]
 
-            model = ARIMA(y_train, order=(1, 1, 1), seasonal_order=(1, 0, 1, 7), exog=x_train)
+            model = ARIMA(y_train, order=(1, 1, 1), exog=x_train)
             model_fit = model.fit()
 
             predictions = model_fit.forecast(len(x_test), exog=x_test)

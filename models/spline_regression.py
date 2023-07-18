@@ -31,17 +31,17 @@ class SplineRegression:
             hourly_data = data[h::24]
 
             temp = np.array(hourly_data.loc[:, "scaled_temp"])
-            basis_x = dmatrix("bs(scaled_temp, knots=(0, 0.5, 1, 1.3), degree=3, include_intercept=True)", {"scaled_temp": temp}, return_type='dataframe')
+            basis_x = dmatrix("bs(scaled_temp, knots=(-1, 0, 1), degree=3, include_intercept=True)", {"scaled_temp": temp}, return_type='dataframe')
 
             basis_x["demand_lag"] = np.array(hourly_data.loc[:, "demand_lag_24"])
             basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
-            basis_x["temp_1"] = np.array(hourly_data.loc[:, "temp_lag_1"]) 
-            basis_x["temp_15"] = np.array(hourly_data.loc[:, "temp_lag_15"])
+            basis_x["temp_1"] = np.array(hourly_data.loc[:, "temp_1"]) 
+            basis_x["temp_15"] = np.array(hourly_data.loc[:, "temp_15"])
             basis_x["is_weekend"] = np.array(hourly_data.loc[:, "is_weekend"])
             #basis_x["wind_speed"] = np.array(hourly_data.loc[:, "wind_speed"])
             basis_x["rel_hum"] = np.array(hourly_data.loc[:, "rel_hum"])
-            basis_x["rel_hum_temp"] = np.array(hourly_data.loc[:, "rel_hum"]) * np.array(hourly_data.loc[:, "scaled_temp"]) 
-            basis_x["temp_high_corr"] = np.array(hourly_data.loc[:, "temp_lag_"+str(max_corr_lags_winter[h])])
+            #basis_x["rel_hum_temp"] = np.array(hourly_data.loc[:, "rel_hum"]) * np.array(hourly_data.loc[:, "scaled_temp"]) 
+            basis_x["temp_high_corr"] = np.array(hourly_data.loc[:, "temp_"+str(max_corr_lags_winter[h])])
             basis_x["temp_high_corr_inde"] = np.array(hourly_data.loc[:, "temp_index_"+str(max_corr_lags_winter[h])])
 
             basis_x["date_time"] = hourly_data.index
@@ -60,18 +60,17 @@ class SplineRegression:
             training_forecasts = model.predict(train_features)
             residuals = np.array(training_forecasts - train_target)
 
-
             residual_predictors = ["scaled_temp", "is_weekend"]
 
-            #res_model = ARIMA(residuals[-50:], order=(1, 0, 1), exog=np.array(hourly_data.loc[:, residual_predictors][-51:-1])).fit()
-            #training_res_hat = res_model.predict(0, len(residuals[-50:]) - 1, exog=temp[-51:-1])
+            res_model = ARIMA(residuals[-50:], order=(1, 0, 1), exog=np.array(hourly_data.loc[:, residual_predictors][-51:-1])).fit()
+            training_res_hat = res_model.predict(0, len(residuals[-50:]) - 1, exog=temp[-51:-1])
 
-            #res_hat = res_model.forecast(1, exog=np.array(hourly_data.loc[:, residual_predictors])[-1])
+            res_hat = res_model.forecast(1, exog=np.array(hourly_data.loc[:, residual_predictors])[-1])
 
             test_features = exog.loc[test_start:test_end, :]
             base_forecast = model.predict(test_features).tolist()
 
-            forecast = base_forecast
+            forecast = base_forecast - res_hat
             #print(len(forecast)) #- res_hat
             forecasts["h_" + str(h)] = forecast
 

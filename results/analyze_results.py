@@ -12,7 +12,7 @@ def calc_mape(df):
 start = datetime.datetime(2021, 1, 1, 0, 0, 0)
 end = datetime.datetime(2021, 12, 31, 23, 0, 0)
 
-data = pd.read_csv("results\simulation_results_spline_202.csv")
+data = pd.read_csv("results\quadratic_fourier_regression_2021.csv")
 data["date_time"] = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'), data.loc[:, "date_time"]))
 data.set_index("date_time", inplace=True)
 

@@ -34,7 +34,7 @@ class Combined_model:
 
         spline_train_preds = spline_reg.get_predictions(data, train_start, train_end, start_lin_reg, end_lin_reg)
         quad_train_preds = quad_reg.get_predictions(data, train_start, train_end, start_lin_reg, end_lin_reg)
-        inf_norm_reg_preds = inf_norm_reg.get_predictions(data, train_start, train_end, start_lin_reg, end_lin_reg)
+        #inf_norm_reg_preds = inf_norm_reg.get_predictions(data, train_start, train_end, start_lin_reg, end_lin_reg)
         #fourier_train_preds = fourier_reg.get_predictions(data, train_start, train_end, start_lin_reg, end_lin_reg)
         
 
@@ -51,7 +51,7 @@ class Combined_model:
 
         spline_preds = spline_reg.get_predictions(data, train_start, train_end, test_start, test_end)
         quad_preds = quad_reg.get_predictions(data, train_start, train_end, test_start, test_end)
-        inf_norm_reg_preds = inf_norm_reg.get_predictions(data, train_start, train_end, test_start, test_end)
+        #inf_norm_reg_preds = inf_norm_reg.get_predictions(data, train_start, train_end, test_start, test_end)
         #fourier_preds = fourier_reg.get_predictions(data, train_start, train_end, test_start, test_end)
 
         model_preds = pd.DataFrame({
