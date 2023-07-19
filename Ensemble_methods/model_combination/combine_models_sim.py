@@ -18,9 +18,10 @@ sarimax = pd.read_csv("results\sarimax_2021.csv")
 quad_spain = pd.read_csv("results\quad_spain_2021.csv")
 spline_spain = pd.read_csv("results\spline_spain_2021.csv")
 spline_corrected_spain = pd.read_csv("results\spline_spain_corrected_2021.csv")
+quad_quebec_temp = pd.read_csv("results\\fourier_quebec_weather.csv")
 
-plt.plot(spline_regression.loc[:, "demand"], label="Demand")
-plt.plot(spline_regression.loc[:, "forecast"], label="Regression splines model")
+"""plt.plot(spline_regression.loc[:, "demand"], label="Demand")
+plt.plot(quad_quebec_temp.loc[:, "forecast"], label="quebec temp")
 plt.plot(quadratic_regression.loc[:, "forecast"], label="Fourier series model")
 plt.legend()
 plt.show()
@@ -31,12 +32,13 @@ quadratic_residuals = quadratic_regression.loc[:, "demand"] - quadratic_regressi
 plt.hist(spline_residuals, bins=100, label="Regression splines model")
 plt.hist(quadratic_residuals, bins=100, label="Fourier series model")
 plt.legend()
-plt.show()
+plt.show()"""
 
 # choose model to combine
-data = pd.concat([spline_regression.loc[:, ["date_time", "demand", "scaled_temp", "forecast"]], 
-                  quadratic_regression.loc[:, "forecast"]],
+data = pd.concat([spline_corrected_spain.loc[:, ["date_time", "demand", "scaled_temp", "forecast"]], 
+                  quad_spain.loc[:, "forecast"]],
                   ignore_index=True, axis=1)
+
 data.columns = ["date_time", "demand", "scaled_temp", "spline", "quadratic"]
 data["date_time"] = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'), data.loc[:, "date_time"]))
 data.set_index("date_time", inplace=True)
@@ -94,21 +96,21 @@ for i in range((360 - window_size_days)*24):
 print(ensemble_params)
 print(results)
 plt.plot(results.loc[:, "demand"], label="Demand")
-plt.plot(results.loc[:, "forecast_combined_means"], label="combined model")
+plt.plot(results.loc[:, "forecast_reg"], label="Regression model")
 plt.legend()
 plt.show()
 
-plt.plot(ensemble_params.loc[:, ["spline", "quadratic"]], label=["Regression splines", "Fourier series"])
+"""plt.plot(ensemble_params.loc[:, ["spline", "quadratic", "queb"]], label=["Regression splines", "Fourier series", "Quebec temperature"])
 plt.legend()
-plt.show()
+plt.show()"""
 
 print("RMSE for combined forecast: ")
-print(rmse(np.array(results.loc[:, "demand"]), np.array(results.loc[:, "forecast_combined_means"])))
+print(rmse(np.array(results.loc[:, "demand"]), np.array(results.loc[:, "forecast_reg"])))
 
 print("MAPE for combined forecast: ")
-print(mape(np.array(results.loc[:, "demand"]), np.array(results.loc[:, "forecast_combined_means"])))
+print(mape(np.array(results.loc[:, "demand"]), np.array(results.loc[:, "forecast_reg"])))
 
-residuals = abs(results.loc[:, "demand"] - results.loc[:, "forecast_combined_means"])
+residuals = abs(results.loc[:, "demand"] - results.loc[:, "forecast_reg"])
 plt.hist(residuals, bins=100)
 plt.show()
 
@@ -119,6 +121,7 @@ print(len(residuals[residuals <= 500]) / len(residuals))
 print("1000 MW success rate: ")
 print(len(residuals[residuals <= 1000]) / len(residuals))
 
+results.to_csv("results\combined_spain.csv")
 
 
 

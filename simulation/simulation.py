@@ -27,7 +27,7 @@ class Simulation:
         self.train_end = train_end
         self.test_start = test_start
         self.test_end = test_end
-        self.data = RE_data()
+        self.data = HQ_data()
         self.data = self.data.get_history()
 
     def get_prediction(self, train_start, train_end, test_start, test_end):
@@ -36,11 +36,11 @@ class Simulation:
         """model = Combined_model()
         forecasts, params = model.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
-        spline_reg = SplineRegression()
-        forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
+        """spline_reg = SplineRegression()
+        forecasts = spline_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
 
-        """quad_reg = QuadraticRegression()
-        forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
+        quad_reg = QuadraticRegression()
+        forecasts = quad_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)
 
         """inf_norm_reg = InfiniteNormMinimization()
         forecasts = inf_norm_reg.get_predictions(self.data, train_start, train_end, test_start, test_end)"""
@@ -87,7 +87,7 @@ class Simulation:
 
         results["forecast"] = forecasts
 
-        results.to_csv("results\\spline_spain_corrected_2021.csv")
+        results.to_csv("results\\fourier_quebec_weather.csv")
 
         demand = np.array(self.data.loc[sim_start:sim_end, "demand"])
 

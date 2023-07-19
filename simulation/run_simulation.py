@@ -2,7 +2,7 @@
 from simulation import Simulation
 import datetime
 
-train_start = datetime.datetime(2018, 1, 1, 0, 0, 0)
+train_start = datetime.datetime(2019, 1, 5, 0, 0, 0)
 train_end = datetime.datetime(2020, 12, 31, 23, 0, 0)
 test_start = datetime.datetime(2021, 1, 1, 0, 0,0)
 test_end = datetime.datetime(2021, 1, 1, 23, 0, 0)
