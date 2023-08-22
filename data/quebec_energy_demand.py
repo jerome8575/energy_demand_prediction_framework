@@ -17,7 +17,7 @@ class HQ_data():
 
         demand_data = pd.concat([data_2019, data_2020, data_2021, data_2022])
         #weather_data = pd.read_csv("data_files\montreal_weather_index.csv")
-        weather_data = pd.read_csv("data_files\quebec_city_weather_index.csv")
+        weather_data = pd.read_csv("data_files\montreal_weather_index.csv")
 
         self.data = self.get_features(demand_data, weather_data)
 

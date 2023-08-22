@@ -31,16 +31,16 @@ class SplineRegression:
             hourly_data = data[h::24]
 
             temp = np.array(hourly_data.loc[:, "scaled_temp"])
-            basis_x = dmatrix("bs(scaled_temp, knots=(-1, 0, 1), degree=3, include_intercept=True)", {"scaled_temp": temp}, return_type='dataframe')
+            basis_x = dmatrix("bs(scaled_temp, knots=(-1, -0.5, 0, 0.5, 1), degree=3, include_intercept=True)", {"scaled_temp": temp}, return_type='dataframe')
 
-            basis_x["demand_lag"] = np.array(hourly_data.loc[:, "demand_lag_24"])
-            basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
+            #basis_x["demand_lag"] = np.array(hourly_data.loc[:, "demand_lag_24"])
+            #basis_x["is_clear"] = np.array(hourly_data.loc[:, "is_clear"])
             basis_x["temp_1"] = np.array(hourly_data.loc[:, "temp_1"]) 
             basis_x["temp_15"] = np.array(hourly_data.loc[:, "temp_15"])
             basis_x["is_weekend"] = np.array(hourly_data.loc[:, "is_weekend"])
             #basis_x["wind_speed"] = np.array(hourly_data.loc[:, "wind_speed"])
-            basis_x["rel_hum"] = np.array(hourly_data.loc[:, "rel_hum"])
-            #basis_x["rel_hum_temp"] = np.array(hourly_data.loc[:, "rel_hum"]) * np.array(hourly_data.loc[:, "scaled_temp"]) 
+            #basis_x["rel_hum"] = np.array(hourly_data.loc[:, "rel_hum"])
+            #basis_x["rel_hum_temp"] = np.array(hourly_data.loc[:, "rel_hum"]) * np.array(hourly_data.loc[:, "scaled_temp"])
             basis_x["temp_high_corr"] = np.array(hourly_data.loc[:, "temp_"+str(max_corr_lags_winter[h])])
             basis_x["temp_high_corr_inde"] = np.array(hourly_data.loc[:, "temp_index_"+str(max_corr_lags_winter[h])])
 

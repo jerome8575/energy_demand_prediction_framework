@@ -26,10 +26,10 @@ class SARIMAX_model:
             hourly_data = data[h::24]
 
             temp = hourly_data.loc[:, ["scaled_temp"]]
-            temp["is_clear"] = hourly_data.loc[:, "is_clear"].values
+            #temp["is_clear"] = hourly_data.loc[:, "is_clear"].values
             #temp["rel_hum"] = hourly_data.loc[:, "rel_hum"].values
             #temp["wind_speed"] = hourly_data.loc[:, "wind_speed"].values
-            temp["temp_15"] = hourly_data.loc[:, "temp_lag_15"].values
+            temp["temp_15"] = hourly_data.loc[:, "temp_15"].values
             temp["temp_index_15"] = hourly_data.loc[:, "temp_index_15"].values
 
             ff_week = self.get_fourier_features(6, 7, hourly_data.loc[:, "day"])

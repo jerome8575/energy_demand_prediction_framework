@@ -9,10 +9,10 @@ def calc_mape(df):
     return np.mean(np.abs((np.array(df.loc[:, "demand"]) - np.array(df.loc[:, "forecast"]))) / np.array(df.loc[:, "demand"])) * 100
 
 
-start = datetime.datetime(2021, 1, 1, 0, 0, 0)
-end = datetime.datetime(2021, 12, 31, 23, 0, 0)
+start = datetime.datetime(2022, 1, 1, 0, 0, 0)
+end = datetime.datetime(2022, 12, 31, 23, 0, 0)
 
-data = pd.read_csv("results\combined_forecast_best_so_far.csv")
+data = pd.read_csv("results\spline_spain.csv")
 data["date_time"] = list(map(lambda t: datetime.datetime.strptime(t, '%Y-%m-%d %H:%M:%S'), data.loc[:, "date_time"]))
 data.set_index("date_time", inplace=True)
 

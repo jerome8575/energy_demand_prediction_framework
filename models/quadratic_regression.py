@@ -29,7 +29,7 @@ class QuadraticRegression:
         features = fourier_features
         features["scaled_temp"] = data.loc[:, "scaled_temp"].values
         features["is_clear"] = data.loc[:, "is_clear"].values
-        features["temp_lag_15"] = data.loc[:, "temp_lag_15"].values
+        features["temp_15"] = data.loc[:, "temp_15"].values
         features["temp_index_15"] = data.loc[:, "temp_index_15"].values
         features["demand_lag_24"] = data.loc[:, "demand_lag_24"].values
         features["rel_hum"] = data.loc[:, "rel_hum"].values
